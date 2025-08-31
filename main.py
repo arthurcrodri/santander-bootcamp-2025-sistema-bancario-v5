@@ -1,4 +1,4 @@
-# Sistema Bancário V4.1
+# Sistema Bancário V4.2
 # Desenvolvido para o Santander Bootcamp 2025
 # Autor: Arthur Rodrigues
 
@@ -12,13 +12,30 @@ MAX_SAQUE = 500.00
 LIMITE_SAQUES = 3
 LIMITE_TRANSACOES_DIARIAS = 10
 
-# --- DECORADOR DE LOG ---
+# --- NOVO DECORADOR DE LOG ---
 def log_transacao(func):
+    """
+    Decorador que registra informações da função executada em um arquivo de log.
+    """
     def wrapper(*args, **kwargs):
-        data_hora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
         resultado = func(*args, **kwargs)
-        if resultado: # Apenas loga se a operação principal foi bem sucedida
-            print(f"---------------------------------------------------\n{data_hora} - Operação '{func.__name__.upper()}' executada!")
+        
+        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Formata a mensagem de log com todos os detalhes solicitados
+        log_msg = (
+            f"[{data_hora}] Função: '{func.__name__}' | "
+            f"Argumentos: {args}, {kwargs} | "
+            f"Retorno: {resultado}\n"
+        )
+        
+        # Adiciona a mensagem ao arquivo log.txt
+        try:
+            with open("log.txt", "a", encoding="utf-8") as arquivo_log:
+                arquivo_log.write(log_msg)
+        except IOError as e:
+            print(f"@@@ Erro ao escrever no arquivo de log: {e} @@@")
+            
         return resultado
     return wrapper
 
@@ -39,7 +56,6 @@ class Historico:
             }
         )
     
-    # --- GERADOR DE RELATÓRIOS ---
     def gerar_relatorio(self, tipo_transacao=None):
         for transacao in self._transacoes:
             if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
@@ -194,7 +210,6 @@ class PessoaFisica(Cliente):
         self.cpf = cpf
         self.data_nascimento = data_nascimento
 
-# --- ITERADOR PERSONALIZADO ---
 class ContaIterador:
     def __init__(self, contas):
         self.contas = contas
@@ -218,7 +233,7 @@ class ContaIterador:
 # Funções do Sistema
 def menu():
     menu_text = """
-\n================ SISTEMA BANCÁRIO V4.1 ================
+\n================ SISTEMA BANCÁRIO V4.2 ================
 
     [c]\tCriar Cliente
     [cc]\tCriar Conta Corrente
@@ -327,7 +342,6 @@ def exibir_extrato(clientes):
     print(f"\nSALDO ATUAL: R$ {conta.saldo:.2f}")
     print("==========================================")
     return True
-
 
 def cadastrar_cliente(clientes):
     cpf = input("Informe o CPF do cliente: ")
